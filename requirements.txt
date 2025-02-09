@@ -1,5 +1,14 @@
-pyaes==1.6.1
-pyasn1==0.6.1
-python-dotenv==1.0.1
-rsa==4.9
-Telethon==1.38.1
+pyaes==1.6.1 ; python_version >= "3.13" and python_version < "4.0" \
+    --hash=sha256:02c1b1405c38d3c370b085fb952dd8bea3fadcee6411ad99f312cc129c536d8f
+pyasn1==0.6.1 ; python_version >= "3.13" and python_version < "4" \
+    --hash=sha256:0d632f46f2ba09143da3a8afe9e33fb6f92fa2320ab7e886e2d0f7672af84629 \
+    --hash=sha256:6f580d2bdd84365380830acf45550f2511469f673cb4a5ae3857a3170128b034
+python-dotenv==1.0.1 ; python_version >= "3.13" and python_version < "4.0" \
+    --hash=sha256:e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca \
+    --hash=sha256:f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a
+rsa==4.9 ; python_version >= "3.13" and python_version < "4" \
+    --hash=sha256:90260d9058e514786967344d0ef75fa8727eed8a7d2e43ce9f4bcf1b536174f7 \
+    --hash=sha256:e38464a49c6c85d7f1351b0126661487a7e0a14a50f1675ec50eb34d4f20ef21
+telethon==1.38.1 ; python_version >= "3.13" and python_version < "4.0" \
+    --hash=sha256:30c187017501bfb982b8af5659f864dda4108f77ea49cfce61e8f6fdb8a18d6e \
+    --hash=sha256:f9866c1e37197a0894e0c02aa56a6359bffb14a585e88e18e3e819df4fda399a
