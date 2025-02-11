@@ -5,9 +5,9 @@ from bot.views import telegram_webhook
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin', admin.site.urls),
     # path('api/', include('api.urls')),
-    path('webhook/', telegram_webhook, name="telegram-webhook"),
+    path('webhook', telegram_webhook, name="telegram-webhook"),
 ]
 
 # if settings.DEBUG:

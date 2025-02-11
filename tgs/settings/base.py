@@ -24,6 +24,8 @@ ALLOWED_HOSTS = []
 SECRET_KEY                    = get_env('SECRET_KEY', required=True)
 TELEGRAM_BOT_TOKEN            = get_env('TELEGRAM_BOT_TOKEN', required=True)
 TELEGRAM_WEBHOOK_SECRET_TOKEN = get_env('TELEGRAM_WEBHOOK_SECRET_TOKEN', required=True)
+TELEGRAM_API_ID               = get_env('TELEGRAM_API_ID', required=True)
+TELEGRAM_API_HASH             = get_env('TELEGRAM_API_HASH', required=True)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
