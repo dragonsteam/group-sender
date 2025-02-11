@@ -3,7 +3,7 @@ services:
     depends_on:
       - db
     build: .
-    command: bash scripts/docker-entrypoint.sh dev
+    command: bash scripts/entrypoint.sh dev
     environment:
       - DJANGO_SETTINGS_MODULE=tgs.settings.dev
     ports:
