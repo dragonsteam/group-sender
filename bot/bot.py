@@ -32,7 +32,7 @@ def get_client(phone) -> TelegramClient:
     return TelegramClient(session_name, settings.TELEGRAM_API_ID, settings.TELEGRAM_API_HASH)
 
 
-phone_hashes_holder = dict()
+user_auth_data = dict()
 
 
 @bot.message_handler(commands=['help', 'start'])
@@ -64,35 +64,70 @@ def process_phone_step(message: Message):
         asyncio.set_event_loop(asyncio.new_event_loop())
     
     client = get_client(phone)
-    logging.warning(client)    
-    
-    # client.connect()
+    client.connect()
 
-    # result = client.send_code_request(phone=phone)
-    # logging.warning(result)
-    # logging.warning(result.phone_code_hash)
+    try:
+        result = client.send_code_request(phone=phone)
+    except Exception as e:
+        logging.error(e)
+        bot.reply_to(message, "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.")
+        return
 
-    # client._phone_code_hash = {'998901558090': '967f16199eb7d4647f'}
-    # me = client.sign_in(phone=phone, code="34025")
-    # logging.warning(me)
+    # save phone hash temporarily
+    user_auth_data[message.from_user.id] = {
+        "phone": phone,
+        "phone_hash": result.phone_code_hash
+    }
+    # user_auth_data[phone] = result.phone_code_hash
+
+    logging.warning(result)
+    logging.warning(result.phone_code_hash)
 
     # me = client.get_me()
     # logging.warning(me)
 
-    # client.disconnect()
-
-
-    return
-    result = client.send_code_request(phone=phone)
-    # parse the phone (removes + sign)
-    phone = utils.parse_phone(phone=phone)
-    # save phone hash temporarily
-    phone_hashes_holder[phone] = result.phone_code_hash
+    client.disconnect()
     
-    print(result.phone_code_hash)
+    msg = bot.reply_to(message, "Iltimos raqamingizga yuborilgal kodni kiriting:")
+    bot.register_next_step_handler(msg, process_verify_code_step)
 
-    # register_user(message.contact.phone_number, message.from_user.id)
-    bot.reply_to(message, "registery success " + message.contact.phone_number + " " + result.phone_code_hash)
+
+def process_verify_code_step(message: Message):
+    logging.warning('message')
+    logging.warning(message.text)
+
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        asyncio.set_event_loop(asyncio.new_event_loop())
+
+    auth = user_auth_data.get(message.from_user.id, None)
+
+    if not auth: return
+
+    client = get_client(auth['phone'])
+    client.connect()
+
+    phone = auth['phone']
+    # parse the phone (removes '+' sign)
+    parsed_phone = utils.parse_phone(phone=phone)
+
+    me = None
+
+    client._phone_code_hash = {parsed_phone: auth['phone_hash']}
+    logging.warning(client._phone_code_hash)
+
+    try:
+        me = client.sign_in(phone=phone, code=message.text)
+    except Exception as e:
+        logging.error(e)
+        bot.reply_to(message, "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.")
+        return
+    logging.warning(me)
+
+    client.disconnect()
+
+
 
 
 # register_handlers(bot)
