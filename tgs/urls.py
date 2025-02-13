@@ -3,11 +3,17 @@ from django.urls import path, include
 
 from bot.views import telegram_webhook
 
+from django.shortcuts import render
+
+def index(request):
+    return render(request, 'index.html')
+
 
 urlpatterns = [
-    path('admin', admin.site.urls),
-    # path('api/', include('api.urls')),
     path('webhook', telegram_webhook, name="telegram-webhook"),
+    path('admin', admin.site.urls),
+    path('', index, name='index'),
+    # path('api/', include('api.urls')),
 ]
 
 # if settings.DEBUG:

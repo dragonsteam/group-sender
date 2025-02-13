@@ -5,6 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .bot import bot
 
+import logging
+
 
 @csrf_exempt
 def telegram_webhook(request: HttpRequest):
@@ -14,8 +16,8 @@ def telegram_webhook(request: HttpRequest):
 
         secret_token = request.headers.get('X-Telegram-Bot-Api-Secret-Token', None)
         if secret_token and secret_token == settings.TELEGRAM_WEBHOOK_SECRET_TOKEN:
-            # log("telegram UPDATE")
-            # log(request.body.decode('UTF-8'))
+            # logging.warning("telegram UPDATE")
+            # logging.warning(request.body.decode('UTF-8'))
             update = telebot.types.Update.de_json(request.body.decode('UTF-8'))
             bot.process_new_updates(updates=[update])
         else:
