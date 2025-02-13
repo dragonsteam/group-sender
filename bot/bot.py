@@ -13,6 +13,8 @@ from telebot.types import (
 from telethon import utils, errors
 from telethon.sync import TelegramClient
 
+from .auth import is_authorized, register_or_authorize
+
 import logging
 
 # from .text import get_text as _
@@ -32,7 +34,6 @@ def get_client(phone) -> TelegramClient:
     # sessions_dir = str(settings.BASE_DIR/'sessions')
     # session_name = sessions_dir + '/' + utils.parse_phone(phone=phone)
     session_name = "sessions/" + utils.parse_phone(phone=phone)
-    logging.warning(session_name)
     return TelegramClient(session_name, settings.TELEGRAM_API_ID, settings.TELEGRAM_API_HASH)
 
 
@@ -41,18 +42,24 @@ user_auth_data = dict()
 
 @bot.message_handler(commands=['help', 'start'])
 def send_welcome(message: Message):
-    # Create a reply keyboard (not inline) to request contact
-    markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    button = KeyboardButton("📞 Telefon raqamini ulashish", request_contact=True)
-    markup.add(button)
-    msg = bot.send_message(message.chat.id, "Telefon raqamingizni ulashing:", reply_markup=markup)
-    bot.register_next_step_handler(msg, process_phone_step)
+    user = is_authorized(message.from_user.id)
+    logging.warning(user)
+
+    if not user:
+        markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+        button = KeyboardButton("📞 Telefon raqamini ulashish", request_contact=True)
+        markup.add(button)
+        msg = bot.send_message(message.chat.id, "Telefon raqamingizni ulashing:", reply_markup=markup)
+        bot.register_next_step_handler(msg, process_phone_step)
+        return
+
+    bot.reply_to(message, "authorized.")
 
 
 def process_phone_step(message: Message):
     # check if user actually share a contact number
     if not message.contact:
-        bot.reply_to(message, "Iltimos o'z kontaktingizni yuboring.")
+        bot.reply_to(message, "Siz kontaktingizni yubormadingiz.")
         return
     
     # check if that contact belongs to user (not other)
@@ -60,7 +67,6 @@ def process_phone_step(message: Message):
         bot.reply_to(message, "Bu raqam sizga tegishli emas.")
         return
     phone = message.contact.phone_number
-    logging.warning(phone)
 
     try:
         asyncio.get_running_loop()
@@ -127,13 +133,14 @@ def process_verify_code_step(message: Message):
     # parse the phone (removes '+' sign)
     parsed_phone = utils.parse_phone(phone=phone)
 
-    me = None
+    tg_user = None
     two_step_detected = False
 
     client._phone_code_hash = {parsed_phone: auth['phone_hash']}
 
     try:
-        me = client.sign_in(phone=phone, code=verify_code)
+        tg_user = client.sign_in(phone=phone, code=verify_code)
+        register_or_authorize(tg_user.id, phone)
     except errors.SessionPasswordNeededError:
         two_step_detected = True
     except Exception as e:
@@ -157,7 +164,7 @@ def process_verify_code_step(message: Message):
 
     client.disconnect()
 
-    bot.reply_to(message, "Authentication finished.")
+    bot.reply_to(message, "✅ Siz muvofaqqiyatli ro'yxatdan o'tdingiz. \nBotdan foydalanish uchun yana /start komandasini bosing.")
 
 
 def process_2fa_step(message: Message):
@@ -182,12 +189,11 @@ def process_2fa_step(message: Message):
     # parse the phone (removes '+' sign)
     parsed_phone = utils.parse_phone(phone=phone)
 
-    me = None
-
     client._phone_code_hash = {parsed_phone: auth['phone_hash']}
 
     try:
-        me = client.sign_in(phone=phone, password=pass_2fa)
+        tg_user = client.sign_in(phone=phone, password=pass_2fa)
+        register_or_authorize(tg_user.id, phone)
     except Exception as e:
         logging.error(e)
         bot.reply_to(message, "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.")
@@ -195,7 +201,7 @@ def process_2fa_step(message: Message):
     
     client.disconnect()
     
-    bot.reply_to(message, "Authentication finished.")
+    bot.reply_to(message, "✅ Siz muvofaqqiyatli ro'yxatdan o'tdingiz. \nBotdan foydalanish uchun yana /start komandasini bosing.")
 
 
 
