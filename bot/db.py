@@ -21,3 +21,7 @@ def register_or_authorize(user_id, phone):
             phone=phone,
             is_logged_in=True,
         )
+
+
+def get_user_phone(user_id):
+    return TelegramUser.objects.get(telegram_id=user_id).phone

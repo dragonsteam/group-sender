@@ -5,15 +5,22 @@ from telebot.types import (
     InlineKeyboardMarkup,
 )
 
+TEXT_MENU = {
+    "auto_message":     "🤖 Avto xabar jo'natish",
+    "cancel_message":   "❌ Avto xabarni to'xtatish",
+    "folder_settings":  "🗂 Papkalarni sozlash",
+    "profile_settings": "👤 Profilni sozlash",
+}
+
 
 def get_menu_keyboard():
     markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     markup.row(
-        KeyboardButton("🤖 Avto xabar jo'natish"),
-        KeyboardButton("❌ Avto xabarni to'xtatish"),
+        KeyboardButton(TEXT_MENU['auto_message']),
+        KeyboardButton(TEXT_MENU['cancel_message']),
     )
     markup.row(
-        KeyboardButton("🗂 Papkalarni sozlash"),
-        KeyboardButton("👤 Profilni sozlash"),
+        KeyboardButton(TEXT_MENU['folder_settings']),
+        KeyboardButton(TEXT_MENU['profile_settings']),
     )
     return markup

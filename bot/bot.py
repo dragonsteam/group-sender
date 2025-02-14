@@ -7,10 +7,11 @@ from telebot.types import (
     WebAppInfo
 )
 
-from .base import bot
+from .base import bot, send_error_message
 from .db import is_authorized
-from .keyboards import get_menu_keyboard
+from .keyboards import get_menu_keyboard, TEXT_MENU
 from .auth import start_auth
+from .automessage import handle_auto_message
 
 import logging
 
@@ -28,6 +29,14 @@ def send_welcome(message: Message):
 
     bot.reply_to(message, "authorized.", reply_markup=get_menu_keyboard())
 
+
+@bot.message_handler(func=lambda msg: msg.text == TEXT_MENU['auto_message'])
+def handle_auto_message_start(message):
+    try:
+        handle_auto_message(message)
+    except Exception as e:
+        logging.error(e)
+        bot.reply_to(message, "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.")
 
 
 # register_handlers(bot)

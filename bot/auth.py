@@ -9,7 +9,7 @@ from telebot.types import (
 from telethon import utils, errors
 
 from .base import bot, get_client, URL
-from .db import is_authorized, register_or_authorize
+from .db import register_or_authorize
 
 import logging
 
@@ -18,9 +18,7 @@ user_auth_data = dict()
 
 
 def start_auth(message: Message):
-    logging.error("fuck")
     try:
-        logging.error("fuck")
         markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
         button = KeyboardButton("📞 Telefon raqamini ulashish", request_contact=True)
         markup.add(button)
