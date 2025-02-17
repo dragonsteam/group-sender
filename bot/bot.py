@@ -11,7 +11,7 @@ from .base import bot, send_error_message
 from .db import is_authorized
 from .keyboards import get_menu_keyboard, TEXT_MENU
 from .auth import start_auth
-from .automessage import handle_auto_message
+from .automessage import handle_auto_message, handle_cancel_message
 
 import logging
 
@@ -36,7 +36,16 @@ def handle_auto_message_start(message):
         handle_auto_message(message)
     except Exception as e:
         logging.error(e)
-        bot.reply_to(message, "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.")
+        send_error_message(message)
+
+
+@bot.message_handler(func=lambda msg: msg.text == TEXT_MENU['cancel_message'])
+def handle_auto_message_start(message):
+    try:
+        handle_cancel_message(message)
+    except Exception as e:
+        logging.error(e)
+        send_error_message(message)
 
 
 # register_handlers(bot)

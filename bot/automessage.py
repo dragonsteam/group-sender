@@ -12,7 +12,7 @@ from telethon.types import DialogFilterDefault
 from .base import bot, get_client, fix_event_loop, send_error_message
 from .db import get_user_phone
 from .keyboards import get_menu_keyboard
-from .scheduler import create_task
+from .scheduler import create_task, stop_task
 
 import logging
 
@@ -32,7 +32,7 @@ def handle_auto_message(message: Message):
             if type(dialog_filter) == DialogFilterDefault:
                 markup.add(InlineKeyboardButton("📦 Barcha chatlar", callback_data="select_folder#1"))
             else:
-                logging.warning(dialog_filter)
+                # logging.warning(dialog_filter)
                 markup.add(InlineKeyboardButton(f"🗂 {dialog_filter.title}", callback_data=f"select_folder#{dialog_filter.id}"))
     
     bot.send_message(message.chat.id, msg, reply_markup=markup)
@@ -53,6 +53,7 @@ def handle_task_message(message: Message, folder_id):
     try:
         markup = InlineKeyboardMarkup()
         markup.row(
+            InlineKeyboardButton("1", callback_data=f"create_task#{folder_id}#{message.text}#1"),
             InlineKeyboardButton("3️⃣", callback_data=f"create_task#{folder_id}#{message.text}#3"),
             InlineKeyboardButton("5️⃣", callback_data=f"create_task#{folder_id}#{message.text}#5"),
             InlineKeyboardButton("8️⃣", callback_data=f"create_task#{folder_id}#{message.text}#8"),
@@ -74,7 +75,7 @@ def handle_create_task(call: CallbackQuery):
         folder_id = int(folder_id)
         interval = int(interval)
 
-        create_task(call.from_user.id, folder_id, message, interval=1)
+        create_task(call.from_user.id, folder_id, message, interval=interval)
 
         bot.send_message(
             call.message.chat.id,
@@ -84,3 +85,11 @@ def handle_create_task(call: CallbackQuery):
     except Exception as e:
         logging.error(e)
         send_error_message(call.message)
+
+
+def handle_cancel_message(message: Message):
+    # fix_event_loop()
+
+    stop_task(message.from_user.id)
+
+    bot.send_message(message.chat.id, "✅ Barcha avto xabarlar to'xtatildi.")

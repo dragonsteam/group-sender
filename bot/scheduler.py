@@ -74,14 +74,16 @@ def my_task(user_id, folder_id, message):
 def create_task(user_id, folder_id, message, interval = 3):
     """Start a new periodic task for the user"""
     job_id = f"user_task_{user_id}"
+
+    if job_id in user_tasks:
+        stop_task(user_id)
     
-    if job_id not in user_tasks:
-        job = scheduler.add_job(
-            my_task,
-            trigger=IntervalTrigger(minutes=interval), id=job_id, args=[user_id, folder_id, message]
-        )
-        user_tasks[job_id] = job
-        # logging.warning(f"Task started for User {user_id}!")
+    job = scheduler.add_job(
+        my_task,
+        trigger=IntervalTrigger(minutes=interval), id=job_id, args=[user_id, folder_id, message]
+    )
+    user_tasks[job_id] = job
+    # logging.warning(f"Task started for User {user_id}!")
 
 def stop_task(user_id):
     """Stop the periodic task for the user"""
