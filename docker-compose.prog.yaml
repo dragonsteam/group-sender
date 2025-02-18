@@ -1,0 +1,33 @@
+services:
+  api:
+    depends_on:
+      - db
+    image: ghcr.io/dragonsteam/group-sender:latest
+    command: bash scripts/entrypoint.sh dev
+    env_file:
+      - ./.env
+    environment:
+      - DJANGO_SETTINGS_MODULE=tgs.settings.dev
+    ports:
+      - 127.0.0.1:8000:8000
+
+  db:
+    image: postgres:alpine3.18
+    # ports:
+    # - 5432:5432
+    environment:
+      - POSTGRES_DB=tgs_db
+      - POSTGRES_PASSWORD=pwd
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2-alpine
+    # ports:
+    # - 6379:6379
+    volumes:
+      - redisdata:/data
+
+volumes:
+  postgresdata:
+  redisdata:
