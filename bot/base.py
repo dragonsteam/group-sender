@@ -5,6 +5,8 @@ from telebot.types import Message
 from telethon import utils, errors
 from telethon.sync import TelegramClient
 
+from .keyboards import get_menu_keyboard
+
 import logging
 
 # logger = telebot.logger
@@ -29,4 +31,8 @@ def fix_event_loop():
 
 
 def send_error_message(message: Message):
-    bot.reply_to(message, "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.")
+    bot.reply_to(
+        message,
+        "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.",
+        reply_markup=get_menu_keyboard()
+    )

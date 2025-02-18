@@ -8,7 +8,7 @@ from telebot.types import (
 )
 
 from .base import bot, send_error_message
-from .db import is_authorized
+from .db import is_authorized, unauthorize
 from .keyboards import get_menu_keyboard, TEXT_MENU
 from .auth import start_auth
 from .automessage import handle_auto_message, handle_cancel_message
@@ -31,16 +31,21 @@ def send_welcome(message: Message):
 
 
 @bot.message_handler(func=lambda msg: msg.text == TEXT_MENU['auto_message'])
-def handle_auto_message_start(message):
+def handle_auto_message_start(message: Message):
     try:
         handle_auto_message(message)
     except Exception as e:
+        if type(e) == EOFError:
+            unauthorize(message.from_user.id)
+            start_auth(message)
+            return
+        
         logging.error(e)
         send_error_message(message)
 
 
 @bot.message_handler(func=lambda msg: msg.text == TEXT_MENU['cancel_message'])
-def handle_auto_message_start(message):
+def handle_auto_message_cancel(message):
     try:
         handle_cancel_message(message)
     except Exception as e:

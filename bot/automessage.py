@@ -27,14 +27,22 @@ def handle_auto_message(message: Message):
 
     with get_client(user_phone) as client:
         dialog_filters = client(functions.messages.GetDialogFiltersRequest())
+
+        filters_count = 0
     
         for dialog_filter in dialog_filters.filters:
             if type(dialog_filter) == DialogFilterDefault:
-                markup.add(InlineKeyboardButton("📦 Barcha chatlar", callback_data="select_folder#1"))
+                # markup.add(InlineKeyboardButton("📦 Barcha chatlar", callback_data="select_folder#1"))
+                pass
             else:
                 # logging.warning(dialog_filter)
                 markup.add(InlineKeyboardButton(f"🗂 {dialog_filter.title}", callback_data=f"select_folder#{dialog_filter.id}"))
-    
+                filters_count += 1
+        
+        if not filters_count:
+            bot.send_message(message.chat.id, "Sizda papkalar topilmadi. Iltimos telegramda yangi papka qo'shing.")
+            return
+
     bot.send_message(message.chat.id, msg, reply_markup=markup)
 
 
@@ -53,7 +61,7 @@ def handle_task_message(message: Message, folder_id):
     try:
         markup = InlineKeyboardMarkup()
         markup.row(
-            InlineKeyboardButton("1", callback_data=f"create_task#{folder_id}#{message.text}#1"),
+            # InlineKeyboardButton("1", callback_data=f"create_task#{folder_id}#{message.text}#1"),
             InlineKeyboardButton("3️⃣", callback_data=f"create_task#{folder_id}#{message.text}#3"),
             InlineKeyboardButton("5️⃣", callback_data=f"create_task#{folder_id}#{message.text}#5"),
             InlineKeyboardButton("8️⃣", callback_data=f"create_task#{folder_id}#{message.text}#8"),

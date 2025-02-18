@@ -5,7 +5,8 @@ from telethon.sync import functions
 from telethon.types import DialogFilterDefault, InputPeerEmpty
 
 from .base import fix_event_loop, get_client
-from .db import get_user_phone
+from .db import get_user_phone, unauthorize
+from .auth import start_auth
 
 import logging
 
@@ -67,8 +68,14 @@ def my_task(user_id, folder_id, message):
             #         logging.warning(dialog_filter)
             #         client.send_message(folder_id, "🦀")
     except Exception as e:
+        if type(e) == EOFError:
+            unauthorize(message.from_user.id)
+            start_auth(message)
+            return
+        
         logging.error(f">>> Error on executing task for user: {user_id}")
         logging.error(e)
+        stop_task(user_id=user_id)
     
 
 def create_task(user_id, folder_id, message, interval = 3):

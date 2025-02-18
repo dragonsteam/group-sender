@@ -19,8 +19,8 @@ def get_menu_keyboard():
         KeyboardButton(TEXT_MENU['auto_message']),
         KeyboardButton(TEXT_MENU['cancel_message']),
     )
-    markup.row(
-        KeyboardButton(TEXT_MENU['folder_settings']),
-        KeyboardButton(TEXT_MENU['profile_settings']),
-    )
+    # markup.row(
+    #     KeyboardButton(TEXT_MENU['folder_settings']),
+    #     KeyboardButton(TEXT_MENU['profile_settings']),
+    # )
     return markup

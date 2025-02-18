@@ -23,5 +23,11 @@ def register_or_authorize(user_id, phone):
         )
 
 
+def unauthorize(user_id):
+    user = TelegramUser.objects.get(telegram_id=user_id)
+    user.is_logged_in=False
+    user.save(update_fields=['is_logged_in'])
+
+
 def get_user_phone(user_id):
     return TelegramUser.objects.get(telegram_id=user_id).phone
