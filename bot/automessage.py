@@ -17,6 +17,9 @@ from .scheduler import create_task, stop_task
 import logging
 
 
+auto_msgs_data = dict()
+
+
 def handle_auto_message(message: Message):
     fix_event_loop()
 
@@ -58,14 +61,17 @@ def handle_select_folder(call):
 
 
 def handle_task_message(message: Message, folder_id):
+    # save message
+    auto_msgs_data[message.from_user.id] = message.text
+
     try:
         markup = InlineKeyboardMarkup()
         markup.row(
             # InlineKeyboardButton("1", callback_data=f"create_task#{folder_id}#{message.text}#1"),
-            InlineKeyboardButton("3️⃣", callback_data=f"create_task#{folder_id}#{message.text}#3"),
-            InlineKeyboardButton("5️⃣", callback_data=f"create_task#{folder_id}#{message.text}#5"),
-            InlineKeyboardButton("8️⃣", callback_data=f"create_task#{folder_id}#{message.text}#8"),
-            InlineKeyboardButton("🔟", callback_data=f"create_task#{folder_id}#{message.text}#10"),
+            InlineKeyboardButton("3️⃣", callback_data=f"create_task#{folder_id}#{message.id}#3"),
+            InlineKeyboardButton("5️⃣", callback_data=f"create_task#{folder_id}#{message.id}#5"),
+            InlineKeyboardButton("8️⃣", callback_data=f"create_task#{folder_id}#{message.id}#8"),
+            InlineKeyboardButton("🔟", callback_data=f"create_task#{folder_id}#{message.id}#10"),
         )
 
         bot.send_message(message.chat.id, "⏰ Jo'natish intervalini tanlang (minut)", reply_markup=markup)
@@ -85,11 +91,17 @@ def handle_create_task(call: CallbackQuery):
             bot.send_message(call.message.chat.id, "❌ Sizning obunangiz tugagan. Iltimos adminga murojaat qiling.")
             return
 
-        _, folder_id, message, interval = call.data.split("#")
+        _, folder_id, message_id, interval = call.data.split("#")
         folder_id = int(folder_id)
+        message_id = int(message_id)
         interval = int(interval)
 
-        create_task(call.from_user.id, folder_id, message, interval=interval)
+        text = auto_msgs_data.get(call.from_user.id, None)
+        if not text:
+            bot.send_message(call.message.chat.id, "Out of Memory error.")
+            return
+
+        create_task(call.from_user.id, folder_id, text, interval=interval)
 
         bot.send_message(
             call.message.chat.id,

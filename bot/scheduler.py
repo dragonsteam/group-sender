@@ -30,7 +30,7 @@ def get_dialog_filter(client, filter_id):
             return dialog_filter
         
 
-def my_task(user_id, folder_id, message):
+def my_task(user_id, folder_id, text):
     try:
         fix_event_loop()
 
@@ -50,7 +50,8 @@ def my_task(user_id, folder_id, message):
             dialog_filter = get_dialog_filter(client, folder_id)
             for peer in dialog_filter.include_peers:
                 entity = client.get_entity(peer)
-                client.send_message(entity, message)
+                client.send_message(entity, text)
+                # message = client.get_messages('yevauzbot', ids=message_id)
 
             # for dialog in result.dialogs:
             #     entity = client.get_entity(dialog.peer)  # Resolve entity
@@ -69,8 +70,8 @@ def my_task(user_id, folder_id, message):
             #         client.send_message(folder_id, "🦀")
     except Exception as e:
         if type(e) == EOFError:
-            unauthorize(message.from_user.id)
-            start_auth(message)
+            unauthorize(user_id)
+            start_auth(chat_id=user_id)
             return
         
         logging.error(f">>> Error on executing task for user: {user_id}")
@@ -78,7 +79,7 @@ def my_task(user_id, folder_id, message):
         stop_task(user_id=user_id)
     
 
-def create_task(user_id, folder_id, message, interval = 3):
+def create_task(user_id, folder_id, text, interval = 3):
     """Start a new periodic task for the user"""
     job_id = f"user_task_{user_id}"
 
@@ -89,7 +90,7 @@ def create_task(user_id, folder_id, message, interval = 3):
         my_task,
         trigger=IntervalTrigger(minutes=interval),
         id=job_id,
-        args=[user_id, folder_id, message],
+        args=[user_id, folder_id, text],
         next_run_time=datetime.now(),
     )
     user_tasks[job_id] = job
