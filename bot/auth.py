@@ -8,7 +8,7 @@ from telebot.types import (
 )
 from telethon import utils, errors
 
-from .base import bot, get_client, URL
+from .base import bot, get_client, send_error_message, URL
 from .db import register_or_authorize
 
 import logging
@@ -53,7 +53,7 @@ def process_phone_step(message: Message):
         result = client.send_code_request(phone=phone)
     except Exception as e:
         logging.error(e)
-        bot.reply_to(message, "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.")
+        send_error_message(message)
         return
 
     # save phone hash temporarily
@@ -106,12 +106,13 @@ def process_verify_code_step(message: Message):
 
     try:
         tg_user = client.sign_in(phone=phone, code=verify_code)
-        register_or_authorize(tg_user.id, phone)
+        is_new_user = register_or_authorize(tg_user.id, phone)
+        if is_new_user: msg_new_sub_added(message)
     except errors.SessionPasswordNeededError:
         two_step_detected = True
     except Exception as e:
         logging.error(e)
-        bot.reply_to(message, "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.")
+        send_error_message(message)
         return
 
     # hande 2fa detection
@@ -130,7 +131,7 @@ def process_verify_code_step(message: Message):
 
     client.disconnect()
 
-    bot.reply_to(message, "✅ Siz muvofaqqiyatli ro'yxatdan o'tdingiz. \nBotdan foydalanish uchun yana /start komandasini bosing.")
+    bot.send_message(message.chat.id, "✅ Siz muvofaqqiyatli ro'yxatdan o'tdingiz. \nBotdan foydalanish uchun yana /start komandasini bosing.")
 
 
 def process_2fa_step(message: Message):
@@ -159,14 +160,17 @@ def process_2fa_step(message: Message):
 
     try:
         tg_user = client.sign_in(phone=phone, password=pass_2fa)
-        register_or_authorize(tg_user.id, phone)
+        is_new_user = register_or_authorize(tg_user.id, phone)
+        if is_new_user: msg_new_sub_added(message)
     except Exception as e:
         logging.error(e)
-        bot.reply_to(message, "Kutilmagan hatolik yuz berdi. Iltimos qayta urinib ko'ring.")
+        send_error_message(message)
         return
     
     client.disconnect()
     
-    bot.reply_to(message, "✅ Siz muvofaqqiyatli ro'yxatdan o'tdingiz. \nBotdan foydalanish uchun yana /start komandasini bosing.")
+    bot.send_message(message.chat.id, "✅ Siz muvofaqqiyatli ro'yxatdan o'tdingiz. \nBotdan foydalanish uchun yana /start komandasini bosing.")
 
 
+def msg_new_sub_added(message: Message):
+    bot.send_message(message.chat.id, "🎁 Sizga bepul 1 haftalik obuna qo'shildi.")

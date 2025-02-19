@@ -27,11 +27,11 @@ def send_welcome(message: Message):
         start_auth(message)
         return
 
-    bot.reply_to(message, "authorized.", reply_markup=get_menu_keyboard())
+    bot.reply_to(message, "Bot siz foydalanishingiz uchun tayyor.", reply_markup=get_menu_keyboard())
 
 
 @bot.message_handler(func=lambda msg: msg.text == TEXT_MENU['auto_message'])
-def handle_auto_message_start(message: Message):
+def handle_auto_message_start(message: Message):    
     try:
         handle_auto_message(message)
     except Exception as e:

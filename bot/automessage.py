@@ -10,7 +10,7 @@ from telethon import functions
 from telethon.types import DialogFilterDefault
 
 from .base import bot, get_client, fix_event_loop, send_error_message
-from .db import get_user_phone
+from .db import get_user_phone, has_subscription
 from .keyboards import get_menu_keyboard
 from .scheduler import create_task, stop_task
 
@@ -76,8 +76,14 @@ def handle_task_message(message: Message, folder_id):
 
 @bot.callback_query_handler(func=lambda call: "create_task#" in call.data)
 def handle_create_task(call: CallbackQuery):
+    bot.answer_callback_query(call.id)
+
     try:
-        bot.answer_callback_query(call.id)
+        # check subscription first
+        has_sub = has_subscription(user_id=call.from_user.id)
+        if not has_sub:
+            bot.send_message(call.message.chat.id, "Sizning obunangiz tugagan. Iltimos adminga murojaat qiling.")
+            return
 
         _, folder_id, message, interval = call.data.split("#")
         folder_id = int(folder_id)

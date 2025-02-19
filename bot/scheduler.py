@@ -1,4 +1,4 @@
-import time
+from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from telethon.sync import functions
@@ -87,7 +87,10 @@ def create_task(user_id, folder_id, message, interval = 3):
     
     job = scheduler.add_job(
         my_task,
-        trigger=IntervalTrigger(minutes=interval), id=job_id, args=[user_id, folder_id, message]
+        trigger=IntervalTrigger(minutes=interval),
+        id=job_id,
+        args=[user_id, folder_id, message],
+        next_run_time=datetime.now(),
     )
     user_tasks[job_id] = job
     # logging.warning(f"Task started for User {user_id}!")
