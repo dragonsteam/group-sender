@@ -12,8 +12,6 @@ import logging
 # logger = telebot.logger
 # telebot.logger.setLevel(logging.INFO)
 
-URL = "https://porpoise-knowing-eel.ngrok-free.app"
-
 bot = TeleBot(settings.TELEGRAM_BOT_TOKEN)
 
 def get_client(phone) -> TelegramClient:

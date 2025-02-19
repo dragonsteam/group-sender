@@ -7,8 +7,9 @@ from telebot.types import (
     WebAppInfo
 )
 from telethon import utils, errors
+from django.conf import settings
 
-from .base import bot, get_client, send_error_message, URL
+from .base import bot, get_client, send_error_message
 from .db import register_or_authorize
 
 import logging
@@ -65,7 +66,7 @@ def process_phone_step(message: Message):
     client.disconnect()
 
     markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    button = KeyboardButton("🔑 Kiritish", web_app=WebAppInfo(url=URL))
+    button = KeyboardButton("🔑 Kiritish", web_app=WebAppInfo(url=settings.TELEGRAM_WEBHOOK_URL))
     markup.add(button)
 
     
@@ -118,7 +119,7 @@ def process_verify_code_step(message: Message):
     # hande 2fa detection
     if two_step_detected:
         markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-        button = KeyboardButton("🔑 Kiritish", web_app=WebAppInfo(url=URL))
+        button = KeyboardButton("🔑 Kiritish", web_app=WebAppInfo(url=settings.TELEGRAM_WEBHOOK_URL))
         markup.add(button)
         
         msg = bot.reply_to(
