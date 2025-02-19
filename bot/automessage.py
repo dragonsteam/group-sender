@@ -82,7 +82,7 @@ def handle_create_task(call: CallbackQuery):
         # check subscription first
         has_sub = has_subscription(user_id=call.from_user.id)
         if not has_sub:
-            bot.send_message(call.message.chat.id, "Sizning obunangiz tugagan. Iltimos adminga murojaat qiling.")
+            bot.send_message(call.message.chat.id, "❌ Sizning obunangiz tugagan. Iltimos adminga murojaat qiling.")
             return
 
         _, folder_id, message, interval = call.data.split("#")

@@ -22,7 +22,7 @@ def start_auth(message: Message):
         markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
         button = KeyboardButton("📞 Telefon raqamini ulashish", request_contact=True)
         markup.add(button)
-        msg = bot.send_message(message.chat.id, "Siz o'z hisobingizga kirmagansiz.\n Hisobga kirish uchun telefon raqamingizni ulashing:", reply_markup=markup)
+        msg = bot.send_message(message.chat.id, "Siz o'z hisobingizga kirmagansiz.\nHisobga kirish uchun telefon raqamingizni ulashing:", reply_markup=markup)
         bot.register_next_step_handler(msg, process_phone_step)
     except Exception as e:
         logging.error(e)
