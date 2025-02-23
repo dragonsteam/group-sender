@@ -10,7 +10,7 @@ from telethon import functions
 from telethon.types import DialogFilterDefault
 
 from .base import bot, get_client, fix_event_loop, send_error_message
-from .db import get_user_phone, has_subscription
+from .db import get_user_phone, get_api_connected, has_subscription
 from .keyboards import get_menu_keyboard
 from .scheduler import create_task, stop_task
 
@@ -27,8 +27,9 @@ def handle_auto_message(message: Message):
     markup = InlineKeyboardMarkup()
 
     user_phone = get_user_phone(message.from_user.id)
+    api = get_api_connected(message.from_user.id)
 
-    with get_client(user_phone) as client:
+    with get_client(user_phone, api.api_id, api.api_hash) as client:
         dialog_filters = client(functions.messages.GetDialogFiltersRequest())
 
         filters_count = 0
@@ -105,7 +106,7 @@ def handle_create_task(call: CallbackQuery):
 
         bot.send_message(
             call.message.chat.id,
-            f"""✅ Xabar jo'natish boshlandi.\n\nBekor qilish uchun [❌ Avto xabarni to'xtatish] tugmasini bosing.""",
+            f"""✅ Xabar jo'natish boshlandi.\n\nBekor qilish uchun \n[❌ Avto xabarni to'xtatish] tugmasini bosing.""",
             reply_markup=get_menu_keyboard()
         )
     except Exception as e:

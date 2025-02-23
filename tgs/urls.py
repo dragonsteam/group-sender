@@ -11,7 +11,7 @@ def index(request):
 
 urlpatterns = [
     path('webhook', telegram_webhook, name="telegram-webhook"),
-    path('admin', admin.site.urls),
+    path('admin/', admin.site.urls),
     path('', index, name='index'),
     # path('api/', include('api.urls')),
 ]

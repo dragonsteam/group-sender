@@ -18,10 +18,12 @@ def register_or_authorize(user_id, phone):
         user = TelegramUser.objects.get(telegram_id=user_id)
         user.is_logged_in = True
         user.save(update_fields=['is_logged_in'])
+        return user
     except TelegramUser.DoesNotExist:
         free_sub_days = 7 # 1 week
 
         TelegramUser.objects.create(
+            api=None,
             telegram_id=user_id,
             phone=phone,
             is_logged_in=True,
@@ -32,10 +34,35 @@ def register_or_authorize(user_id, phone):
     return False
 
 
+def attempt_user_create(user_id, phone):
+    try:
+        user = TelegramUser.objects.get(telegram_id=user_id)
+        return user
+    except TelegramUser.DoesNotExist:
+        TelegramUser.objects.create(
+            api=None,
+            telegram_id=user_id,
+            phone=phone,
+            is_logged_in=False,
+            subscription=timezone.now().date() ### is is needed?
+        )
+        # return true if user is new
+        return True
+    return False
+
+
 def unauthorize(user_id):
     user = TelegramUser.objects.get(telegram_id=user_id)
     user.is_logged_in=False
     user.save(update_fields=['is_logged_in'])
+
+
+def get_api_connected(user_id):
+    try:
+        user = TelegramUser.objects.get(telegram_id=user_id)
+        return user.api
+    except TelegramUser.DoesNotExist:
+        return None
 
 
 def get_user_phone(user_id):

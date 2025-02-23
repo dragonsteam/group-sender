@@ -14,11 +14,11 @@ import logging
 
 bot = TeleBot(settings.TELEGRAM_BOT_TOKEN)
 
-def get_client(phone) -> TelegramClient:
+def get_client(phone, api_id, api_hash) -> TelegramClient:
     # sessions_dir = str(settings.BASE_DIR/'sessions')
     # session_name = sessions_dir + '/' + utils.parse_phone(phone=phone)
-    session_name = "sessions/" + utils.parse_phone(phone=phone)
-    return TelegramClient(session_name, settings.TELEGRAM_API_ID, settings.TELEGRAM_API_HASH)
+    session_name = f"sessions/{api_id}_{utils.parse_phone(phone=phone)}"
+    return TelegramClient(session_name, api_id=api_id, api_hash=api_hash)
 
 
 def fix_event_loop():

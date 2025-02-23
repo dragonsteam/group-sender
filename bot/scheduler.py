@@ -5,7 +5,7 @@ from telethon.sync import functions
 from telethon.types import DialogFilterDefault, InputPeerEmpty
 
 from .base import fix_event_loop, get_client
-from .db import get_user_phone, unauthorize
+from .db import get_user_phone, get_api_connected, unauthorize
 from .auth import start_auth
 
 import logging
@@ -35,8 +35,9 @@ def my_task(user_id, folder_id, text):
         fix_event_loop()
 
         user_phone = get_user_phone(user_id)
+        api = get_api_connected(user_id)
 
-        with get_client(user_phone) as client:
+        with get_client(user_phone, api.api_id, api.api_hash) as client:
             # # Get only dialogs in the specific folder
             # result = client(functions.messages.GetDialogsRequest(
             #     offset_date=None,

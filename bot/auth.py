@@ -10,7 +10,7 @@ from telethon import utils, errors
 from django.conf import settings
 
 from .base import bot, get_client, send_error_message
-from .db import register_or_authorize
+from .db import register_or_authorize, get_api_connected, attempt_user_create
 
 import logging
 
@@ -42,12 +42,19 @@ def process_phone_step(message: Message):
         return
     phone = message.contact.phone_number
 
+    # check if and api connected to the user
+    api = get_api_connected(message.from_user.id)
+    if not api:
+        attempt_user_create(message.from_user.id, phone)
+        bot.send_message(message.chat.id, "Sizda hisob aktivlashtirilmagan.\n Iltimos Adminga habar bering 👉 @nickphilomath")
+        return
+
     try:
         asyncio.get_running_loop()
     except RuntimeError:
         asyncio.set_event_loop(asyncio.new_event_loop())
     
-    client = get_client(phone)
+    client = get_client(phone, api.api_id, api.api_hash)
     client.connect()
 
     try:
@@ -93,10 +100,12 @@ def process_verify_code_step(message: Message):
 
     if not auth: return
 
-    client = get_client(auth['phone'])
+    phone = auth['phone']
+    api = get_api_connected(message.from_user.id)
+
+    client = get_client(phone, api.api_id, api.api_hash)
     client.connect()
 
-    phone = auth['phone']
     # parse the phone (removes '+' sign)
     parsed_phone = utils.parse_phone(phone=phone)
 
@@ -150,10 +159,12 @@ def process_2fa_step(message: Message):
 
     if not auth: return
 
-    client = get_client(auth['phone'])
+    phone = auth['phone']
+    api = get_api_connected(message.from_user.id)
+
+    client = get_client(phone, api.api_id, api.api_hash)
     client.connect()
 
-    phone = auth['phone']
     # parse the phone (removes '+' sign)
     parsed_phone = utils.parse_phone(phone=phone)
 
