@@ -31,8 +31,8 @@ else
     echo ">> Collecting static files..."
     python manage.py collectstatic --noinput
 
-    echo ">>> Populate database with dummy data"
-    python manage.py createdata
+    # echo ">>> Populate database with dummy data"
+    # python manage.py createdata
 
     echo ">> Running as production server"
     gunicorn tgs.wsgi -w 3 -b 0.0.0.0:8000

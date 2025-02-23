@@ -3,11 +3,11 @@ services:
     depends_on:
       - db
     image: ghcr.io/dragonsteam/group-sender:latest
-    command: bash scripts/entrypoint.sh dev
+    command: bash scripts/entrypoint.sh
     env_file:
       - ./.env
     environment:
-      - DJANGO_SETTINGS_MODULE=tgs.settings.dev
+      - DJANGO_SETTINGS_MODULE=tgs.settings.prod
     ports:
       - 127.0.0.1:8000:8000
 
