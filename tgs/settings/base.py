@@ -17,7 +17,7 @@ def get_env(var_name, required=False):
     return value
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ALLOWED_HOSTS = []
 # SITE_ID = 1
 
